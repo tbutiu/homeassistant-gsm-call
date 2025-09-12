@@ -165,3 +165,5 @@ Tested on:
 - Huawei E3531 (needs to be unlocked using [this guide](http://blog.asiantuntijakaveri.fi/2015/07/convert-huawei-e3372h-153-from.html)).
 - ZTE MF192 (`hardware: zte` must be specified in the configuration). Cannot be used simultaneously with the SMS integration.
 - Globetrotter HSUPA (`hardware: gtm382`).
+
+**Want to add support for your modem?** Check out [contributing guidelines](CONTRIBUTING.md#adding-support-for-new-modems) to learn how you can help!
