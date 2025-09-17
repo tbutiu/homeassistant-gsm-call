@@ -157,7 +157,7 @@ notify:
 
 ## Supported hardware
 
-In general, this integration [should be compatible with modems specified here](https://www.home-assistant.io/integrations/sms/#list-of-modems-known-to-work).
+In general, this integration [should be compatible with modems specified here](https://wammu.eu/phones/).
 
 Tested on:
 - Huawei E1550 (identifies as Huawei E161/E169/E620/E800).
