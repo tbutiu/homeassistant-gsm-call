@@ -19,7 +19,7 @@ This integration can be installed using HACS. To add GSM Call to your Home Assis
 3. Paste `black-roland/homeassistant-gsm-call`.
 4. Select _Integration_ in the _Category_ field.
 5. Click the _Save_ icon.
-6. Install “GSM Call”.
+6. Install "GSM Call".
 
 ## Configuration and usage
 
@@ -86,22 +86,17 @@ automation:
 
 In addition to the `reason`, you can filter by the `phone_number`. All possible data properties can be found in [developer tools](https://my.home-assistant.io/create-link/?redirect=developer_events).
 
-## SMS support and other features
+## SMS support
 
-This integration is intended for making voice calls. For SMS support, please check out [this integration](https://www.home-assistant.io/integrations/sms/).
+SMS functionality (sending and potentially receiving messages) might be implemented in the future if there's sufficient community interest. This would allow using the modem for text notifications alongside phone calls.
 
-### Using together with the SMS integration
+**If you need SMS functionality:**
+- Add a 👍 to the [relevant GitHub issue](https://github.com/black-roland/homeassistant-gsm-call/issues/17)
+- Leave a comment describing your use cases
 
-GSM modems usually provide multiple interfaces:
+Your feedback will help prioritize this feature for future development.
 
-```shell
-$ ls -1 /dev/serial/by-id/usb-HUAWEI_Technology_HUAWEI_Mobile-if0*
-/dev/serial/by-id/usb-HUAWEI_Technology_HUAWEI_Mobile-if00-port0
-/dev/serial/by-id/usb-HUAWEI_Technology_HUAWEI_Mobile-if01-port0
-/dev/serial/by-id/usb-HUAWEI_Technology_HUAWEI_Mobile-if02-port0
-```
-
-To use this together with the [sms](https://www.home-assistant.io/integrations/sms/) integration, configure different interfaces for each integration. Otherwise, integrations may mutually block each other.
+*Note: This integration is open source. If you'd like to help implement SMS support, please let us know in the issue comments or check out the [contributing guidelines](./CONTRIBUTING.md).*
 
 ## Troubleshooting
 
@@ -159,7 +154,7 @@ Tested on:
 - Huawei E1550 (identifies as Huawei E161/E169/E620/E800).
 - Huawei E171.
 - Huawei E3531 (needs to be unlocked using [this guide](http://blog.asiantuntijakaveri.fi/2015/07/convert-huawei-e3372h-153-from.html)).
-- ZTE MF192 (`hardware: zte` must be specified in the configuration). Cannot be used simultaneously with the SMS integration.
+- ZTE MF192 (`hardware: zte` must be specified in the configuration).
 - Globetrotter HSUPA (`hardware: gtm382`).
 
-**Want to add support for your modem?** Check out [contributing guidelines](CONTRIBUTING.md#adding-support-for-new-modems) to learn how you can help!
+**Want to add support for your modem?** Check out [contributing guidelines](./CONTRIBUTING.md#adding-support-for-new-modems) to learn how you can help!
