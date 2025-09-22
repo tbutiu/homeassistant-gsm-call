@@ -115,10 +115,6 @@ logger:
 
 After restarting, check the logs in *Settings* → *System* → *Logs* (or use [this link to open the logs](https://my.home-assistant.io/redirect/logs/)).
 
-### ModemManager
-
-Please make sure [ModemManager is disabled](https://askubuntu.com/questions/216114/how-can-i-remove-modem-manager-from-boot/612646).
-
 ### ZTE modems
 
 On some ZTE modems, dialing only works after sending an obscure command: `AT%icscall=1,0`. Try specifying `hardware: zte` in the configuration if dialing doesn't work with the default configuration:
