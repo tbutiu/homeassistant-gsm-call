@@ -12,7 +12,7 @@ from .at_dialer import ATDialer
 class ZTEDialer(ATDialer):
     async def dial(self, modem: Modem, phone_number: str) -> EndedReason:
         _LOGGER.debug("Sending ZTE's magic AT%icscall=1,0 command...")
-        modem.writer.write(b"AT%icscall=1,0\r\n")
+        self._send_command(modem, "AT%icscall=1,0")
+        await asyncio.sleep(.5)
 
-        await asyncio.sleep(1)
         return await super().dial(modem, phone_number)
