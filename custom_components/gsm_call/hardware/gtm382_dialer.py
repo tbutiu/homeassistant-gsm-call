@@ -12,11 +12,11 @@ from .at_dialer import ATDialer
 class GTM382Dialer(ATDialer):
     async def dial(self, modem: Modem, phone_number: str) -> EndedReason:
         _LOGGER.debug("Sending AT_ODO=0 to enable circuit-switched data transfer...")
-        modem.writer.write(b"AT_ODO=0\r\n")
+        self._send_command(modem, "AT_ODO=0")
         await asyncio.sleep(.5)
 
         _LOGGER.debug("Sending AT_OPCMENABLE=1 to enable digital voice...")
-        modem.writer.write(b"AT_OPCMENABLE=1\r\n")
+        self._send_command(modem, "AT_OPCMENABLE=1")
         await asyncio.sleep(.5)
 
         return await super().dial(modem, phone_number)
