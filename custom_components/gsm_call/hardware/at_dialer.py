@@ -20,8 +20,7 @@ class ATDialer:
     async def dial(self, modem: Modem, phone_number: str) -> EndedReason:
         _LOGGER.debug(f"Dialing +{phone_number}...")
         try:
-            lines = await self._execute_at(
-                modem,
+            lines = await modem.execute_at(
                 f"{self.at_command}+{phone_number};",
                 timeout=10,
                 end_markers=["OK", "ERROR", "BUSY", "NO CARRIER"]
@@ -58,8 +57,7 @@ class ATDialer:
                 # Phone is ringing: +CLCC: 1,0,3…
                 # Answered:         +CLCC: 1,0,0…
                 # Declined:         Nothing, OK only
-                lines = await self._execute_at(
-                    modem,
+                lines = await modem.execute_at(
                     "AT+CLCC",
                     timeout=2,
                     end_markers=["OK", "ERROR"]
@@ -69,9 +67,7 @@ class ATDialer:
 
                 if not is_ringing and "+CLCC: 1,0,3" in reply:
                     is_ringing = True
-                    _LOGGER.info(
-                        f"Callee's phone started ringing, waiting for {self._call_sec} seconds..."
-                    )
+                    _LOGGER.info(f"Callee's phone started ringing, waiting for {self._call_sec} seconds...")
                     new_deadline = asyncio.get_running_loop().time() + self._call_sec
                     timeout.reschedule(new_deadline)
                     continue
@@ -83,26 +79,3 @@ class ATDialer:
                     return EndedReason.DECLINED
 
                 await asyncio.sleep(.5)
-
-    async def _execute_at(self, modem: Modem, command: str, timeout: float, end_markers: list[str]) -> list[str]:
-        self._send_command(modem, command)
-        return await self._read_response(modem, timeout, end_markers)
-
-    def _send_command(self, modem: Modem, command: str) -> None:
-        _LOGGER.debug(f"Sending command: {command}")
-        modem.writer.write(f"{command}\r\n".encode())
-        # No await drain() needed here as it's synchronous, but for completeness:
-        # await modem.writer.drain()  # Optional, as write is buffered
-
-    async def _read_response(self, modem: Modem, timeout: float, end_markers: list[str]) -> list[str]:
-        lines = []
-        async with asyncio.timeout(timeout):
-            while True:
-                line = await modem.reader.readline()
-                decoded = line.decode(errors='ignore').strip()
-                if not decoded:
-                    continue
-
-                lines.append(decoded)
-                if any(decoded == m or decoded.startswith(m) for m in end_markers):
-                    return lines

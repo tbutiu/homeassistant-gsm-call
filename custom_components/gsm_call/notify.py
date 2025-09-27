@@ -7,25 +7,20 @@ from __future__ import annotations
 import re
 
 import homeassistant.helpers.config_validation as cv
+import serial
 import serial_asyncio_fast as serial_asyncio
 import voluptuous as vol
 from homeassistant.components.notify import ATTR_TARGET
-from homeassistant.components.notify import PLATFORM_SCHEMA as NOTIFY_PLATFORM_SCHEMA
+from homeassistant.components.notify import \
+    PLATFORM_SCHEMA as NOTIFY_PLATFORM_SCHEMA
 from homeassistant.components.notify import BaseNotificationService
 from homeassistant.const import CONF_DEVICE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-from .const import (
-    _LOGGER,
-    ATTR_PHONE_NUMBER,
-    ATTR_REASON,
-    CONF_AT_COMMAND,
-    CONF_CALL_DURATION_SEC,
-    CONF_DIAL_TIMEOUT_SEC,
-    CONF_HARDWARE,
-    EVENT_GSM_CALL_ENDED,
-)
+from .const import (_LOGGER, ATTR_PHONE_NUMBER, ATTR_REASON, CONF_AT_COMMAND,
+                    CONF_CALL_DURATION_SEC, CONF_DIAL_TIMEOUT_SEC,
+                    CONF_HARDWARE, EVENT_GSM_CALL_ENDED)
 from .hardware.at_dialer import ATDialer
 from .hardware.at_tone_dialer import ATToneDialer
 from .hardware.gtm382_dialer import GTM382Dialer
@@ -112,9 +107,9 @@ class GsmCallNotificationService(BaseNotificationService):
             *await serial_asyncio.open_serial_connection(
                 url=self.device_path,
                 baudrate=75600,
-                bytesize=serial_asyncio.serial.EIGHTBITS,
-                parity=serial_asyncio.serial.PARITY_NONE,
-                stopbits=serial_asyncio.serial.STOPBITS_ONE,
+                bytesize=serial.EIGHTBITS,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE,
                 dsrdtr=True,
                 rtscts=True,
                 limit=READ_LIMIT,
