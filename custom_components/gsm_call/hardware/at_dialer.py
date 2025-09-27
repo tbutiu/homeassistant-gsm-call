@@ -23,9 +23,9 @@ class ATDialer:
             lines = await modem.execute_at(
                 f"{self.at_command}+{phone_number};",
                 timeout=10,
-                end_markers=["OK", "ERROR", "BUSY", "NO CARRIER"]
+                end_markers=["OK", "ERROR", "BUSY", "NO CARRIER", "+CME ERROR"]
             )
-            reply = "\n".join(lines)
+            reply = " ".join(lines)
             _LOGGER.debug(f"Modem replied with {reply}")
 
             if "BUSY" in reply:
@@ -40,7 +40,7 @@ class ATDialer:
                 ended_reason = EndedReason.NOT_ANSWERED
 
             _LOGGER.debug("Hanging up...")
-            modem.writer.write(b"AT+CHUP\r\n")
+            modem.send_command("AT+CHUP")
             _LOGGER.info(f"Call ended: {ended_reason}")
 
             return ended_reason
@@ -60,9 +60,9 @@ class ATDialer:
                 lines = await modem.execute_at(
                     "AT+CLCC",
                     timeout=2,
-                    end_markers=["OK", "ERROR"]
+                    end_markers=["OK", "ERROR", "+CME ERROR"]
                 )
-                reply = "\n".join(lines)
+                reply = " ".join(lines)
                 _LOGGER.debug(f"Modem replied with {reply}")
 
                 if not is_ringing and "+CLCC: 1,0,3" in reply:
@@ -78,4 +78,5 @@ class ATDialer:
                 if "+CLCC: 1,0" not in reply:
                     return EndedReason.DECLINED
 
-                await asyncio.sleep(.5)
+                # Intervals lower than 1 sec are causing "+CME ERROR: 100" on some modems
+                await asyncio.sleep(1)
