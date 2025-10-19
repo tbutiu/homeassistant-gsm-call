@@ -14,7 +14,7 @@ class SmsSender:
         lines = await modem.execute_at("AT+CMGF=1", timeout=5, end_markers=["OK", "ERROR", "+CME ERROR"])
         reply = " ".join(lines)
         _LOGGER.debug(f"Modem replied with {reply}")
-        if "ERROR" in reply:
+        if "OK" not in reply:
             raise HomeAssistantError(f"Failed to set text mode: {reply}")
 
         # Send command and wait for prompt
