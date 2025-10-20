@@ -1,6 +1,6 @@
 {
   "domain": "gsm_call",
-  "name": "Voice calls using 3G/4G, LTE modems",
+  "name": "Voice calls and SMS using 3G/4G, LTE modems",
   "codeowners": ["@black-roland"],
   "dependencies": [],
   "documentation": "https://github.com/black-roland/homeassistant-gsm-call#readme",
@@ -8,5 +8,5 @@
   "issue_tracker": "https://github.com/black-roland/homeassistant-gsm-call/issues",
   "loggers": ["gsm_call"],
   "requirements": ["pyserial-asyncio-fast>=0.13"],
-  "version": "0.4.3"
+  "version": "1.0.0-alpha.0"
 }

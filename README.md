@@ -88,15 +88,32 @@ In addition to the `reason`, you can filter by the `phone_number`. All possible 
 
 ## SMS support
 
-SMS functionality (sending and potentially receiving messages) might be implemented in the future if there's sufficient community interest. This would allow using the modem for text notifications alongside phone calls.
+This integration experimentally supports sending SMS messages in addition to making voice calls. To configure SMS notifications, add a separate entry in your `configuration.yaml`:
 
-**If you need SMS functionality:**
-- Add a 👍 to the [relevant GitHub issue](https://github.com/black-roland/homeassistant-gsm-call/issues/17)
-- Leave a comment describing your use cases
+```yaml
+notify:
+  - name: sms
+    platform: gsm_call
+    type: sms
+    device: /dev/serial/by-id/usb-HUAWEI_Technology_HUAWEI_Mobile-if01-port0 # the same path as for calls
+```
 
-Your feedback will help prioritize this feature for future development.
+To send an SMS message, use the `notify.sms` service:
 
-*Note: This integration is open source. If you'd like to help implement SMS support, please let us know in the issue comments or check out the [contributing guidelines](./CONTRIBUTING.md).*
+```yaml
+action:
+  service: notify.sms
+  data:
+    target: "+12345678901"
+    message: "This is an SMS message"
+```
+
+Note:
+- SMS support is experimental: you can track down the implementation progress in [#17](https://github.com/black-roland/homeassistant-gsm-call/issues/17)
+- SMS messages are limited to the GSM 7-bit alphabet (basic Latin letters, digits, and common symbols)
+- The `type: sms` parameter is required to distinguish SMS notifications from voice calls
+- SMS and voice call configurations can coexist in the same `configuration.yaml` file
+- GUI will replace legacy `congiguration.yaml` in v1.0 (stable)
 
 ## Troubleshooting
 
