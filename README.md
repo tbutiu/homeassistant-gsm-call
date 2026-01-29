@@ -1,10 +1,8 @@
-Описание на русском [доступно тут](./README.ru.md).
-<br>
-<br>
+
 
 # Home Assistant GSM Call
 
-[![Add a custom repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=black-roland&repository=homeassistant-gsm-call&category=integration)
+[![Add a custom repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=tbutiu&repository=homeassistant-gsm-call&category=integration)
 
 Home Assistant integration which allows you to call a phone number using 3G/4G, LTE modems.
 
