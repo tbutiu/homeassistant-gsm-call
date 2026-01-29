@@ -3,12 +3,10 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import asyncio
-
 from homeassistant.exceptions import HomeAssistantError
 
 from ..const import _LOGGER, EndedReason
 from ..modem import Modem
-
 
 class ATDialer:
     at_command = "ATD"
@@ -18,10 +16,19 @@ class ATDialer:
         self._call_sec = call_duration_sec
 
     async def dial(self, modem: Modem, phone_number: str) -> EndedReason:
-        _LOGGER.debug(f"Dialing +{phone_number}...")
+        # 1. Resetare buffer modem (Escape) - Esențial pentru a debloca modemul din stări precum promptul ">"
+        _LOGGER.debug("Clearing modem buffer with Escape (\x1B) before dialing")
+        await modem.execute_at("\x1B", timeout=2)
+        await asyncio.sleep(1) # Pauză de stabilitate după resetare
+
+        # 2. Curățăm numărul de telefon pentru a evita dublarea prefixului "+"
+        clean_number = phone_number.replace("+", "")
+        _LOGGER.debug(f"Dialing +{clean_number}...")
+
         try:
+            # 3. Trimitere comandă de apel (ATD) cu punct și virgulă pentru voce
             lines = await modem.execute_at(
-                f"{self.at_command}+{phone_number};",
+                f"{self.at_command}+{clean_number};",
                 timeout=10,
                 end_markers=["OK", "ERROR", "BUSY", "NO CARRIER", "+CME ERROR"]
             )
@@ -39,13 +46,15 @@ class ATDialer:
             except asyncio.TimeoutError:
                 ended_reason = EndedReason.NOT_ANSWERED
 
-            _LOGGER.debug("Hanging up...")
-            modem.send_command("AT+CHUP")
+            # 4. Închidere apel folosind ATH (Hang-up), verificată cu succes în testul tău de shell
+            _LOGGER.debug("Hanging up using ATH...")
+            await modem.execute_at("ATH", timeout=2)
             _LOGGER.info(f"Call ended: {ended_reason}")
 
             return ended_reason
+            
         except asyncio.TimeoutError:
-            raise HomeAssistantError(f"Timeout while dialing +{phone_number}")
+            raise HomeAssistantError(f"Timeout while dialing +{clean_number}")
 
     async def _wait_for_answer(self, modem: Modem):
         _LOGGER.debug(f"Waiting up to {self._dial_sec} seconds for answer...")
@@ -53,10 +62,9 @@ class ATDialer:
         is_ringing = False
         async with asyncio.timeout(self._dial_sec) as timeout:
             while True:
-                # Provisioning:     +CLCC: 1,0,2…
-                # Phone is ringing: +CLCC: 1,0,3…
-                # Answered:         +CLCC: 1,0,0…
-                # Declined:         Nothing, OK only
+                # Monitorizăm starea apelului folosind AT+CLCC
+                # +CLCC: 1,0,3… - Suna (Ringing)
+                # +CLCC: 1,0,0… - Răspuns (Answered)
                 lines = await modem.execute_at(
                     "AT+CLCC",
                     timeout=2,
@@ -65,6 +73,7 @@ class ATDialer:
                 reply = " ".join(lines)
                 _LOGGER.debug(f"Modem replied with {reply}")
 
+                # Dacă detectăm că sună, resetăm deadline-ul pentru durata apelului setată
                 if not is_ringing and "+CLCC: 1,0,3" in reply:
                     is_ringing = True
                     _LOGGER.info(f"Callee's phone started ringing, waiting for {self._call_sec} seconds...")
@@ -75,8 +84,9 @@ class ATDialer:
                 if "+CLCC: 1,0,0" in reply:
                     return EndedReason.ANSWERED
 
+                # Dacă starea apelului nu mai este listată, considerăm apelul închis sau respins
                 if "+CLCC: 1,0" not in reply:
                     return EndedReason.DECLINED
 
-                # Intervals lower than 1 sec are causing "+CME ERROR: 100" on some modems
+                # Pauză de 1 secundă între verificări pentru a evita supraîncărcarea modemului
                 await asyncio.sleep(1)
