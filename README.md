@@ -1,175 +1,115 @@
-
-
 # Home Assistant GSM Call
 
 [![Add a custom repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=tbutiu&repository=homeassistant-gsm-call&category=integration)
 
-Home Assistant integration which allows you to call a phone number using 3G/4G, LTE modems.
+Home Assistant integration that allows you to make voice calls and send SMS messages using 3G/4G/LTE USB modems.
 
-The main idea is to use a modem for emergency notifications about important events in your smart home. However, emergency alerts are just one example, and the integration can be used in other scenarios as well.
+This version includes critical stability fixes for Huawei modems, including buffer clearing sequences (`\x1B`) and asynchronous timing adjustments to prevent serial timeouts.
 
 ## Installation
 
-This integration can be installed using HACS. To add GSM Call to your Home Assistant, click the blue button above or add the repository manually:
+This integration is best installed via **HACS**:
 
-1. Go to *HACS* → *Integrations*.
-2. In the top right corner, select the three-dots menu and choose _Custom repositories_.
-3. Paste `tbutiu/homeassistant-gsm-call`.
-4. Select _Integration_ in the _Category_ field.
-5. Click the _Save_ icon.
-6. Install "GSM Call".
+1. Open **HACS** → **Integrations**.
+2. Click the three dots (⋮) in the top right → **Custom repositories**.
+3. Repository: `tbutiu/homeassistant-gsm-call` | Category: **Integration**.
+4. Click **Add**, then find and install **GSM Call**.
+5. Restart Home Assistant.
 
-## Configuration and usage
+## Configuration
 
-To use this integration, add the following to your `configuration.yaml`:
+Add the following to your `configuration.yaml`. For Huawei modems, we recommend using the specific interface paths identified in your hardware.
 
-```yaml
-notify:
-  - name: call
-    platform: gsm_call
-    device: /dev/serial/by-id/usb-HUAWEI_Technology_HUAWEI_Mobile-if01-port0 # modem device path
-```
-
-The modem path can be obtained by [by clicking on the «All hardware» button](https://my.home-assistant.io/redirect/hardware/).
-
-Make sure to restart Home Assistant after updating `configuration.yaml`. Use the `notify.call` action to make a phone call. The phone number to dial is specified as `target`:
-
-```yaml
-action:
-  service: notify.call
-  data:
-    target: "+12345678901"
-    message: "Required by HASS but not used by the integration — enter any text here"
-```
-
-### Ringing duration
-
-By default, the called phone will ring for approximately 30 seconds. This duration can be adjusted by specifying `call_duration_sec`:
+### Voice Call Configuration
+Used for emergency alerts or triggering automations (e.g., heating control).
 
 ```yaml
 notify:
-  - name: call
+  - name: call_centrala
     platform: gsm_call
-    device: /dev/serial/by-id/usb-HUAWEI_Technology_HUAWEI_Mobile-if01-port0
-    call_duration_sec: 40
+    # Usually if00 is the voice interface for Huawei E352/E171
+    device: /dev/serial/by-id/usb-HUAWEI_HUAWEI_Mobile-if00-port0
+    dial_timeout_sec: 20
+    call_duration_sec: 30
 ```
 
-Note:
-- The duration is counted from the moment the called phone starts ringing.
-- Your carrier might interrupt outgoing call before reaching the desired time if the duration is too high.
+### SMS Configuration
 
-### Dialing timeout
+Note: For maximum stability, use a separate notify entry. You can use the same device path or the PC UI interface (`if02`) if available.
 
-Before the called phone starts ringing, there's typically a 5-10 second delay while the call connects. The integration will wait up to 20 seconds (default) for this connection to establish. This timeout can be adjusted by specifying `dial_timeout_sec`.
+```yaml
+notify:
+  - name: sms_alerta
+    platform: gsm_call
+    type: sms
+    device: /dev/serial/by-id/usb-HUAWEI_HUAWEI_Mobile-if00-port0
+```
+
+## Usage
+
+### Action: Make a Call
+
+```yaml
+action: notify.call_centrala
+data:
+  target: "+407XXXXXXXX"
+  message: "Not used for voice but required by HA"
+```
+
+### Action: Send SMS
+
+```yaml
+action: notify.sms_alerta
+data:
+  target: "+407XXXXXXXX"
+  message: "System: Centrala a fost pornita!"
+```
 
 ## Events
 
-The integration fires the `gsm_call_ended` event indicating whether the call was declined or answered. For example, you can turn off the alarm if the callee declined a call:
+The integration fires the `gsm_call_ended` event. You can use this to trigger actions based on whether you answered or declined the call.
+
+**Example: Turn on heating when a call from owner is declined (Zero cost trigger)**
 
 ```yaml
 automation:
-  - alias: "Disarm the security alarm when a call is declined"
-    triggers:
-      - trigger: event
+  - alias: "Control Centrala via Missed Call"
+    trigger:
+      - platform: event
         event_type: gsm_call_ended
         event_data:
           reason: "declined"
-    actions:
-      - action: alarm_control_panel.alarm_disarm
+          phone_number: "+407XXXXXXXX"
+    action:
+      - action: switch.turn_on
         target:
-          entity_id: alarm_control_panel.security
+          entity_id: switch.releu_centrala
 ```
 
-`reason` can contain the following values: `not_answered`, `declined`, `answered`.
+## Supported Hardware
 
-In addition to the `reason`, you can filter by the `phone_number`. All possible data properties can be found in [developer tools](https://my.home-assistant.io/create-link/?redirect=developer_events).
+Tested and verified:
 
-## SMS support
+* **Huawei E352** (Orange Romania) - *Full support*
+* **Huawei E1550 / E171 / E173**
+* **ZTE MF192** (requires `hardware: zte`)
+* **Globetrotter HSUPA** (requires `hardware: gtm382`)
 
-This integration experimentally supports sending SMS messages in addition to making voice calls. To configure SMS notifications, add a separate entry in your `configuration.yaml`:
+## Troubleshooting & Tips
 
-```yaml
-notify:
-  - name: sms
-    platform: gsm_call
-    type: sms
-    device: /dev/serial/by-id/usb-HUAWEI_Technology_HUAWEI_Mobile-if01-port0 # the same path as for calls
+### Proxmox Users
+
+If running Home Assistant in a VM, ensure the USB controller is set to **USB 2.0** (not 3.0) to avoid serial timing issues and timeouts.
+
+### Modem "Busy" or "Timeout"
+
+If the modem stops responding, it might be stuck in a command prompt (e.g., `>`). Recent versions send an Escape character (`\x1B`) before each command to clear the buffer automatically.
+
+### Manual SMSC Check
+
+Ensure your SMS Center (SMSC) number is correct. For Orange Romania, it should be `+40744946000`.
+
+```bash
+# Verify via terminal
+echo -e "AT+CSCA?\r" > /dev/serial/by-id/usb-HUAWEI_HUAWEI_Mobile-if00-port0
 ```
-
-To send an SMS message, use the `notify.sms` service:
-
-```yaml
-action:
-  service: notify.sms
-  data:
-    target: "+12345678901"
-    message: "This is an SMS message"
-```
-
-Note:
-- SMS support is experimental: you can track down the implementation progress in [#17](https://github.com/tbutiu/homeassistant-gsm-call/issues/17)
-- SMS messages are limited to the GSM 7-bit alphabet (basic Latin letters, digits, and common symbols)
-- The `type: sms` parameter is required to distinguish SMS notifications from voice calls
-- SMS and voice call configurations can coexist in the same `configuration.yaml` file
-- GUI will replace legacy `congiguration.yaml` in v1.0 (stable)
-
-## Troubleshooting
-
-For troubleshooting, first enable debug logs in `configuration.yaml`:
-
-```yaml
-logger:
-  logs:
-    custom_components.gsm_call: debug
-```
-
-After restarting, check the logs in *Settings* → *System* → *Logs* (or use [this link to open the logs](https://my.home-assistant.io/redirect/logs/)).
-
-### ZTE modems
-
-On some ZTE modems, dialing only works after sending an obscure command: `AT%icscall=1,0`. Try specifying `hardware: zte` in the configuration if dialing doesn't work with the default configuration:
-
-```yaml
-notify:
-  - name: call
-    platform: gsm_call
-    device: /dev/serial/by-id/usb-ZTE_MF192_D536C4624C61DC91XXXXXXXXXXXXXXXXXXXXXXXX-if00
-    hardware: zte
-```
-
-### GTM382-based modems
-
-For Globetrotter HSUPA and other GTM382-based modems, add `hardware: gtm382` to your configuration:
-
-```yaml
-notify:
-  - name: call
-    platform: gsm_call
-    device: /dev/ttyHS6
-    hardware: gtm382
-```
-
-### ATD/ATDT (dialing commands)
-
-Most modems work perfectly with default settings, but if you're experiencing issues, your modem might require a specific dialing command. As a troubleshooting step, try specifying `hardware: atdt`:
-
-```yaml
-notify:
-  - name: call
-    platform: gsm_call
-    device: /dev/serial/by-id/usb-Obscure_Hardware-if01-port0
-    hardware: atdt
-```
-
-## Supported hardware
-
-In general, this integration [should be compatible with modems specified here](https://wammu.eu/phones/).
-
-Tested on:
-- Huawei E1550 (identifies as Huawei E161/E169/E620/E800).
-- Huawei E171.
-- Huawei E3531 (needs to be unlocked using [this guide](http://blog.asiantuntijakaveri.fi/2015/07/convert-huawei-e3372h-153-from.html)).
-- ZTE MF192 (`hardware: zte` must be specified in the configuration).
-- Globetrotter HSUPA (`hardware: gtm382`).
-
-**Want to add support for your modem?** Check out [contributing guidelines](./CONTRIBUTING.md#adding-support-for-new-modems) to learn how you can help!

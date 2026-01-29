@@ -1,12 +1,18 @@
 {
   "domain": "gsm_call",
   "name": "Voice calls and SMS using 3G/4G, LTE modems",
-  "codeowners": ["@tbutiu"],
+  "codeowners": [
+    "@tbutiu"
+  ],
   "dependencies": [],
   "documentation": "https://github.com/tbutiu/homeassistant-gsm-call#readme",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/tbutiu/homeassistant-gsm-call/issues",
-  "loggers": ["gsm_call"],
-  "requirements": ["pyserial-asyncio-fast>=0.13"],
-  "version": "1.0.1"
+  "loggers": [
+    "gsm_call"
+  ],
+  "requirements": [
+    "pyserial-asyncio-fast>=0.13"
+  ],
+  "version": "1.0.2"
 }

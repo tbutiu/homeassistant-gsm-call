@@ -18,7 +18,7 @@ class ATDialer:
     async def dial(self, modem: Modem, phone_number: str) -> EndedReason:
         # 1. Resetare buffer modem (Escape) - Esențial pentru a debloca modemul din stări precum promptul ">"
         _LOGGER.debug("Clearing modem buffer with Escape (\x1B) before dialing")
-        await modem.execute_at("\x1B", timeout=2)
+        await modem.execute_at("\x1B", timeout=2, end_markers=[])
         await asyncio.sleep(1) # Pauză de stabilitate după resetare
 
         # 2. Curățăm numărul de telefon pentru a evita dublarea prefixului "+"
