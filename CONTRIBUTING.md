@@ -7,12 +7,12 @@ If you'd like to suggest fixes or new features, here are a few guidelines.
 ## Discussing Changes
 
 Before starting work on major changes or new features, **please discuss them first**:
-1. **Search open [issues](https://github.com/black-roland/homeassistant-gsm-call/issues)** — your idea or issue might already be under discussion.
-2. **Create a [discussion](https://github.com/black-roland/homeassistant-gsm-call/discussions) or [issue](https://github.com/black-roland/homeassistant-gsm-call/issues)** and describe what you want to implement or change. This helps avoid situations where you do work that I cannot accept for various reasons.
+1. **Search open [issues](https://github.com/tbutiu/homeassistant-gsm-call/issues)** — your idea or issue might already be under discussion.
+2. **Create a [discussion](https://github.com/tbutiu/homeassistant-gsm-call/discussions) or [issue](https://github.com/tbutiu/homeassistant-gsm-call/issues)** and describe what you want to implement or change. This helps avoid situations where you do work that I cannot accept for various reasons.
 
 ## Reporting Bugs and Feature Requests
 
-If you found a bug or have an idea for a new feature — create an [issue](https://github.com/black-roland/homeassistant-gsm-call/issues). Before creating one, check if there's already an issue with a similar topic.
+If you found a bug or have an idea for a new feature — create an [issue](https://github.com/tbutiu/homeassistant-gsm-call/issues). Before creating one, check if there's already an issue with a similar topic.
 
 The more detailed your problem or suggestion description is (with reproduction steps, logs, HA versions), the faster I can respond.
 
@@ -49,12 +49,12 @@ Thank you for your contribution!
 ## Обсуждение изменений
 
 Перед тем как начать работу над крупными изменениями или новыми функциями, **пожалуйста, сначала обсудите их**:
-1. **Поищите открытые [issues](https://github.com/black-roland/homeassistant-gsm-call/issues)** — возможно, ваша идея или проблема уже обсуждается.
-2. **Создайте [discussion](https://github.com/black-roland/homeassistant-gsm-call/discussions) или [issue](https://github.com/black-roland/homeassistant-gsm-call/issues)** и опишите, что вы хотите сделать или изменить. Это поможет избежать ситуации, когда вы делаете работу, которую я не смогу принять по каким-либо причинам.
+1. **Поищите открытые [issues](https://github.com/tbutiu/homeassistant-gsm-call/issues)** — возможно, ваша идея или проблема уже обсуждается.
+2. **Создайте [discussion](https://github.com/tbutiu/homeassistant-gsm-call/discussions) или [issue](https://github.com/tbutiu/homeassistant-gsm-call/issues)** и опишите, что вы хотите сделать или изменить. Это поможет избежать ситуации, когда вы делаете работу, которую я не смогу принять по каким-либо причинам.
 
 ## Сообщение об ошибках и запросы функций
 
-Если вы нашли ошибку или у вас есть идея для новой функции — создайте [issue](https://github.com/black-roland/homeassistant-gsm-call/issues). Перед созданием проверьте, нет ли уже Issue с похожей темой.
+Если вы нашли ошибку или у вас есть идея для новой функции — создайте [issue](https://github.com/tbutiu/homeassistant-gsm-call/issues). Перед созданием проверьте, нет ли уже Issue с похожей темой.
 
 Чем детальнее вы опишете проблему или предложение (с шагами для воспроизведения, логами, версиями HA), тем быстрее я смогу отреагировать.
 

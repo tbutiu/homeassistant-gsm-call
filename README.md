@@ -14,7 +14,7 @@ This integration can be installed using HACS. To add GSM Call to your Home Assis
 
 1. Go to *HACS* → *Integrations*.
 2. In the top right corner, select the three-dots menu and choose _Custom repositories_.
-3. Paste `black-roland/homeassistant-gsm-call`.
+3. Paste `tbutiu/homeassistant-gsm-call`.
 4. Select _Integration_ in the _Category_ field.
 5. Click the _Save_ icon.
 6. Install "GSM Call".
@@ -107,7 +107,7 @@ action:
 ```
 
 Note:
-- SMS support is experimental: you can track down the implementation progress in [#17](https://github.com/black-roland/homeassistant-gsm-call/issues/17)
+- SMS support is experimental: you can track down the implementation progress in [#17](https://github.com/tbutiu/homeassistant-gsm-call/issues/17)
 - SMS messages are limited to the GSM 7-bit alphabet (basic Latin letters, digits, and common symbols)
 - The `type: sms` parameter is required to distinguish SMS notifications from voice calls
 - SMS and voice call configurations can coexist in the same `configuration.yaml` file

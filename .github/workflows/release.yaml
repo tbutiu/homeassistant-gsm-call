@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
 
 jobs:
   release:
@@ -31,5 +32,5 @@ jobs:
           draft: true
           files: ${{ runner.temp }}/gsm_call.zip
           body: >
-            [![Downloads](https://img.shields.io/github/downloads/tbutiu/homeassistant-gsm-call/${{ github.ref_name }}/total?style=flat-square)](https://github.com/black-roland/homeassistant-gsm-call/releases)
+            [![Downloads](https://img.shields.io/github/downloads/tbutiu/homeassistant-gsm-call/${{ github.ref_name }}/total?style=flat-square)](https://github.com/tbutiu/homeassistant-gsm-call/releases)
           generate_release_notes: true
