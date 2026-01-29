@@ -16,17 +16,17 @@ class ATDialer:
         self._call_sec = call_duration_sec
 
     async def dial(self, modem: Modem, phone_number: str) -> EndedReason:
-        # 1. Resetare buffer modem (Escape) - Esențial pentru a debloca modemul din stări precum promptul ">"
+        # 1. Resetare buffer modem (Escape) - Verificată în shell pentru deblocare
         _LOGGER.debug("Clearing modem buffer with Escape (\x1B) before dialing")
         await modem.execute_at("\x1B", timeout=2, end_markers=[])
         await asyncio.sleep(1) # Pauză de stabilitate după resetare
 
-        # 2. Curățăm numărul de telefon pentru a evita dublarea prefixului "+"
+        # 2. Curățăm numărul de telefon
         clean_number = phone_number.replace("+", "")
         _LOGGER.debug(f"Dialing +{clean_number}...")
 
         try:
-            # 3. Trimitere comandă de apel (ATD) cu punct și virgulă pentru voce
+            # 3. Trimitere comandă de apel (ATD) cu ";" obligatoriu pentru voce
             lines = await modem.execute_at(
                 f"{self.at_command}+{clean_number};",
                 timeout=10,
@@ -46,11 +46,21 @@ class ATDialer:
             except asyncio.TimeoutError:
                 ended_reason = EndedReason.NOT_ANSWERED
 
-            # 4. Închidere apel folosind ATH (Hang-up), verificată cu succes în testul tău de shell
-            _LOGGER.debug("Hanging up using ATH...")
-            await modem.execute_at("ATH", timeout=2, end_markers=["OK", "ERROR"])
-            _LOGGER.info(f"Call ended: {ended_reason}")
+            # 4. Închidere apel - Logica îmbunătățită pentru eliberarea liniei
+            _LOGGER.debug(f"Call finished with reason: {ended_reason}. Starting hangup sequence...")
+            
+            # Oferim modemului o secundă să proceseze starea finală înainte de CHUP
+            await asyncio.sleep(1) 
 
+            # AT+CHUP este comanda specifică pentru a închide toate apelurile active
+            _LOGGER.debug("Sending AT+CHUP (Release all calls)...")
+            await modem.execute_at("AT+CHUP", timeout=5, end_markers=["OK", "ERROR"])
+            
+            # ATH ca măsură de siguranță finală pentru a pune "receptorul în furcă"
+            _LOGGER.debug("Sending ATH (Hang-up fallback)...")
+            await modem.execute_at("ATH", timeout=2, end_markers=["OK", "ERROR"])
+            
+            _LOGGER.info(f"Call ended and line cleared: {ended_reason}")
             return ended_reason
             
         except asyncio.TimeoutError:
@@ -62,9 +72,7 @@ class ATDialer:
         is_ringing = False
         async with asyncio.timeout(self._dial_sec) as timeout:
             while True:
-                # Monitorizăm starea apelului folosind AT+CLCC
-                # +CLCC: 1,0,3… - Suna (Ringing)
-                # +CLCC: 1,0,0… - Răspuns (Answered)
+                # Monitorizăm starea apelului
                 lines = await modem.execute_at(
                     "AT+CLCC",
                     timeout=2,
@@ -73,20 +81,19 @@ class ATDialer:
                 reply = " ".join(lines)
                 _LOGGER.debug(f"Modem replied with {reply}")
 
-                # Dacă detectăm că sună, resetăm deadline-ul pentru durata apelului setată
                 if not is_ringing and "+CLCC: 1,0,3" in reply:
                     is_ringing = True
-                    _LOGGER.info(f"Callee's phone started ringing, waiting for {self._call_sec} seconds...")
+                    _LOGGER.info(f"Callee's phone started ringing...")
                     new_deadline = asyncio.get_running_loop().time() + self._call_sec
                     timeout.reschedule(new_deadline)
                     continue
 
+                # Cifra 0 în +CLCC înseamnă apel activ (răspuns)
                 if "+CLCC: 1,0,0" in reply:
+                    _LOGGER.info("Call answered by target.")
                     return EndedReason.ANSWERED
 
-                # Dacă starea apelului nu mai este listată, considerăm apelul închis sau respins
                 if "+CLCC: 1,0" not in reply:
                     return EndedReason.DECLINED
 
-                # Pauză de 1 secundă între verificări pentru a evita supraîncărcarea modemului
                 await asyncio.sleep(1)
