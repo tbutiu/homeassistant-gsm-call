@@ -48,7 +48,7 @@ class ATDialer:
 
             # 4. Închidere apel folosind ATH (Hang-up), verificată cu succes în testul tău de shell
             _LOGGER.debug("Hanging up using ATH...")
-            await modem.execute_at("ATH", timeout=2)
+            await modem.execute_at("ATH", timeout=2, end_markers=["OK", "ERROR"])
             _LOGGER.info(f"Call ended: {ended_reason}")
 
             return ended_reason

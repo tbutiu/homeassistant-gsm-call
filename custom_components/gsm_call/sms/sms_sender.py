@@ -7,7 +7,7 @@ class SmsSender:
     async def send(self, modem: Modem, phone_number: str, message: str) -> None:
         # 1. Trimitere CANCEL (\x1B) pentru a debloca portul, exact ca în shell
         _LOGGER.debug("Sending Escape/Cancel to clear modem buffer")
-        await modem.execute_at("\x1B", timeout=2)
+        await modem.execute_at("\x1B", timeout=2, end_markers=[])
         await asyncio.sleep(1) # Pauza necesară pentru procesare
 
         # 2. Setare mod text
@@ -32,7 +32,7 @@ class SmsSender:
         
         if ">" not in reply:
             # Dacă nu primim promptul, trimitem iar un Cancel pentru a nu bloca modemul
-            await modem.execute_at("\x1B", timeout=1)
+            await modem.execute_at("\x1B", timeout=1, end_markers=[])
             raise HomeAssistantError(f"Failed to initiate SMS (no prompt >): {reply}")
 
         # 4. Pauză critică de 2 secunde înainte de a trimite corpul mesajului
