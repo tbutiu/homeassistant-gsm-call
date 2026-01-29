@@ -1,7 +1,7 @@
 {
   "domain": "gsm_call",
   "name": "Voice calls and SMS using 3G/4G, LTE modems",
-  "codeowners": ["@tbutiu],
+  "codeowners": ["@tbutiu"],
   "dependencies": [],
   "documentation": "https://github.com/tbutiu/homeassistant-gsm-call#readme",
   "iot_class": "local_polling",
